@@ -3,18 +3,14 @@
 const refs = {
     startBtn: document.querySelector('[data-action="start"]'),
     stopBtn: document.querySelector('[data-action="stop"]'),
-    daysField: document.querySelector('[data-value="days"]'),
-    hoursField: document.querySelector('[data-value="hours"]'),
-    minsField: document.querySelector('[data-value="mins"]'),
-    secsField: document.querySelector('[data-value="secs"]'),
 };
 
 class CountdownTimer {
-    constructor({onCount, targetDate}){
+    constructor({targetDate, selector}){
         this.intervalId = null;
         this.isActive = false;
-        this.onCount = onCount;
         this.targetDate = targetDate;
+        this.selector = selector;
     }
 
     start() {
@@ -23,20 +19,25 @@ class CountdownTimer {
         };
         const expectedTime = this.targetDate;
         this.isActive = true;
-
+        
+        document.querySelector(this.selector)
+            .insertAdjacentHTML('beforeend', this.createTimerTemplateEls());
+        
         this.intervalId = setInterval(() => {
             const currentTime = Date.now();
             const timeDifference = expectedTime - currentTime;
             const leftTime = this.getTimeElements(timeDifference);
-            this.onCount(leftTime);
+            this.unpdateTimerElements(leftTime);
         }, 1000);
     };
+
 
     stop(){
         clearInterval(this.intervalId);
         this.isActive = false;
         const leftTime = this.getTimeElements(0);
-        this.onCount(leftTime);
+        this.unpdateTimerElements(leftTime);
+        document.querySelector(this.selector).innerHTML = '';
     };
 
     getTimeElements (time) {
@@ -51,11 +52,40 @@ class CountdownTimer {
     pad(value) {
         return String(value).padStart(2, '0');
     };
+
+    createTimerTemplateEls () {
+        return `<div class="field">
+            <span class="value" data-value="days">00</span>
+            <span class="label">Days</span>
+            </div>
+    
+             <div class="field">
+              <span class="value" data-value="hours">00</span>
+              <span class="label">Hours</span>
+            </div>
+          
+            <div class="field">
+              <span class="value" data-value="mins">00</span>
+              <span class="label">Minutes</span>
+            </div>
+          
+            <div class="field">
+              <span class="value" data-value="secs">00</span>
+              <span class="label">Seconds</span>
+            </div>`;
+    };
+
+    unpdateTimerElements ({ days, hours, mins, secs }) {
+        document.querySelector('[data-value="days"]').textContent = `${days}`;
+        document.querySelector('[data-value="hours"]').textContent = `${hours}`; 
+        document.querySelector('[data-value="mins"]').textContent = `${mins}`;
+        document.querySelector('[data-value="secs"]').textContent = `${secs}`;
+    };
 };
 
 const timer = new CountdownTimer({
-    onCount: unpdateTimerElements,
-    targetDate: new Date('August 15 2021'),
+    targetDate: new Date('March 21 2022'),
+    selector: '#timer-1',
 });
 
 refs.startBtn.addEventListener('click', () => {
@@ -66,9 +96,4 @@ refs.stopBtn.addEventListener('click', () => {
     timer.stop();
 });
 
-function unpdateTimerElements ({ days, hours, mins, secs }) {
-    refs.daysField.textContent = `${days}`;
-    refs.hoursField.textContent = `${hours}`;
-    refs.minsField.textContent = `${mins}`;
-    refs.secsField.textContent = `${secs}`;
-};
+
