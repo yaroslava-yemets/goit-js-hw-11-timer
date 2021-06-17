@@ -3,6 +3,7 @@
 const refs = {
     startBtn: document.querySelector('[data-action="start"]'),
     stopBtn: document.querySelector('[data-action="stop"]'),
+    clearBtn: document.querySelector('[data-action="clear"]'),
 };
 
 class CountdownTimer {
@@ -21,7 +22,7 @@ class CountdownTimer {
         this.isActive = true;
         
         document.querySelector(this.selector)
-            .insertAdjacentHTML('beforeend', this.createTimerTemplateEls());
+            .innerHTML = this.createTimerTemplateEls({ days: this.pad(0), hours: this.pad(0), mins: this.pad(0), secs: this.pad(0) });
         
         this.intervalId = setInterval(() => {
             const currentTime = Date.now();
@@ -37,8 +38,16 @@ class CountdownTimer {
         this.isActive = false;
         const leftTime = this.getTimeElements(0);
         this.unpdateTimerElements(leftTime);
-        document.querySelector(this.selector).innerHTML = '';
     };
+
+    clear() {
+        document.querySelector(this.selector)
+            .innerHTML = '';
+        clearInterval(this.intervalId);
+        this.isActive = false;
+        const leftTime = this.getTimeElements(0);
+        this.unpdateTimerElements(leftTime);
+    }
 
     getTimeElements (time) {
         const days = this.pad(Math.floor(time / (1000 * 60 * 60 * 24)));
@@ -53,24 +62,24 @@ class CountdownTimer {
         return String(value).padStart(2, '0');
     };
 
-    createTimerTemplateEls () {
+    createTimerTemplateEls ({ days, hours, mins, secs }) {
         return `<div class="field">
-            <span class="value" data-value="days">00</span>
+            <span class="value" data-value="days">${days}</span>
             <span class="label">Days</span>
             </div>
     
              <div class="field">
-              <span class="value" data-value="hours">00</span>
+              <span class="value" data-value="hours">${hours}</span>
               <span class="label">Hours</span>
             </div>
           
             <div class="field">
-              <span class="value" data-value="mins">00</span>
+              <span class="value" data-value="mins">${mins}</span>
               <span class="label">Minutes</span>
             </div>
           
             <div class="field">
-              <span class="value" data-value="secs">00</span>
+              <span class="value" data-value="secs">${secs}</span>
               <span class="label">Seconds</span>
             </div>`;
     };
@@ -95,5 +104,10 @@ refs.startBtn.addEventListener('click', () => {
 refs.stopBtn.addEventListener('click', () => {
     timer.stop();
 });
+
+refs.clearBtn.addEventListener('click', () => {
+    timer.clear();
+});
+
 
 
